@@ -30,6 +30,62 @@
         gtag("js", new Date());
         gtag("config", "G-BE6C28P61K");
     </script>
+    <script>
+        (function() {
+            function isAccessedFromTwa() {
+                const userAgent = navigator.userAgent;
+                const urlParams = new URLSearchParams(window.location.search);
+
+                // デバッグモード: URLに ?debug_app_access=true があればアプリからのアクセスとみなす
+                if (urlParams.get('debug_app_access') === 'true') {
+                    console.log('Debug mode: Treated as app access.');
+                    return true;
+                }
+
+                // TWAから起動された場合、display-mode は 'standalone' または 'fullscreen' になります。
+                // また、TWAはChromeカスタムタブベースなので、User-Agentに 'Chrome' を含むことが多いです。
+                // 決定的なのは Digital Asset Links の検証が成功していることです。
+                // クライアントサイドのJSでDALの検証結果を直接取得することはできませんが、
+                // TWAとして起動されているかどうかの最も強いヒントはディスプレイモードです。
+                const isStandaloneOrFullscreen = window.matchMedia('(display-mode: standalone)').matches ||
+                                                 window.matchMedia('(display-mode: fullscreen)').matches;
+
+                // TWAのUser-Agentには、通常のChromeとは異なる特定の文字列（例: 特定のアプリ識別子）が
+                // 付与されることがあります。これはBubblewrapなどでカスタムできる場合があります。
+                // もし、TWAビルド時にUser-Agentに `MyAppTWA` のような固有の文字列を追加できるなら、
+                // 以下のようなチェックが最も確実です。
+                // const isCustomTwaUserAgent = userAgent.includes('MyAppTWA'); // 例
+
+                // 現実的な判定:
+                // 1. ディスプレイモードが standalone または fullscreen であること
+                // 2. さらに、User-Agentが特定のブラウザではないこと（より厳密にする場合）
+                //    例：User-Agentに "wv"（WebView）が含まれないことや、特定の特徴がないこと。
+                //    TWAはネイティブアプリに近いUIを持つため、通常のブラウザUI（アドレスバーなど）がない点が重要です。
+                //    `isStandaloneOrFullscreen` が `true` であれば、かなりTWAまたはPWAとしてインストール済と判断できます。
+
+                if (isStandaloneOrFullscreen) {
+                    // ここにさらに厳密なUser-Agentチェックを追加することも可能。
+                    // 例: 特定のWebviewのUser-Agentではないことを確認するなど。
+                    // if (userAgent.includes('wv')) return false; // WebViewからのアクセスは拒否
+                    console.log('Detected standalone/fullscreen display mode. Allowing access.');
+                    return true; // standalone または fullscreen ならTWAからのアクセスとみなす
+                }
+                
+                // 上記の条件を満たさない場合（通常のブラウザ、PCブラウザなど）はTWAからのアクセスではないと判断
+                console.log('Not in standalone/fullscreen display mode. Denying access.');
+                return false;
+            }
+
+            // TWAからのアクセスでなければリダイレクト
+            if (!isAccessedFromTwa()) {
+                const redirectUrl = 'https://hahero-asayake.github.io/Ishanten/'; // リダイレクト先のパス
+                // 無限ループを防ぐため、すでにリダイレクト先にいる場合は何もしない
+                if (!window.location.pathname.endsWith(redirectUrl)) {
+                    window.location.replace(redirectUrl);
+                }
+            }
+        })();
+    </script>
 </head>
 
 <body>
