@@ -78,7 +78,7 @@
 
             // TWAからのアクセスでなければリダイレクト
             if (!isAccessedFromTwa()) {
-                const redirectUrl = 'https://hahero-asayake.github.io/Ishanten/'; // リダイレクト先のパス
+                const redirectUrl = 'https://hahero-asayake.github.io/Ishanten-googleplay/redirect/'; // リダイレクト先のパス
                 // 無限ループを防ぐため、すでにリダイレクト先にいる場合は何もしない
                 if (!window.location.pathname.endsWith(redirectUrl)) {
                     window.location.replace(redirectUrl);
